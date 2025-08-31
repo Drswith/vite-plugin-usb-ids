@@ -132,6 +132,15 @@ importers:
         specifier: catalog:testing
         version: 2.7.0
 
+  examples:
+    devDependencies:
+      typescript:
+        specifier: catalog:cli
+        version: 5.8.2
+      vite:
+        specifier: catalog:cli
+        version: 6.2.1(@types/node@22.13.10)(jiti@2.5.1)(tsx@4.19.3)(yaml@2.7.0)
+
 packages:
 
   '@antfu/eslint-config@4.10.1':

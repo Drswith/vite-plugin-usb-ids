@@ -95,6 +95,9 @@ dist
 .temp
 .cache
 
+# USB device data file (generated during build)
+usb.ids.json
+
 # Sveltekit cache directory
 .svelte-kit/
 

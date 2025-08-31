@@ -38,7 +38,7 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "lint": "eslint",
-    "prepublishOnly": "nr build",
+    "fetch-usb-ids": "tsx scripts/fetch-usb-ids.ts",
     "release": "bumpp && pnpm publish",
     "start": "tsx src/index.ts",
     "test": "vitest run",

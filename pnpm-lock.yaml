@@ -15,9 +15,6 @@ catalogs:
     bumpp:
       specifier: ^10.1.0
       version: 10.1.0
-    consola:
-      specifier: ^3.4.2
-      version: 3.4.2
     eslint:
       specifier: ^9.22.0
       version: 9.22.0
@@ -90,9 +87,6 @@ importers:
       bumpp:
         specifier: catalog:cli
         version: 10.1.0
-      consola:
-        specifier: catalog:cli
-        version: 3.4.2
       eslint:
         specifier: catalog:cli
         version: 9.22.0(jiti@2.5.1)

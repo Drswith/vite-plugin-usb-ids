@@ -4,9 +4,6 @@ export default defineConfig((_) => {
   const share = {
     clean: true,
     target: 'node16',
-    noExternal: [
-      'consola',
-    ],
   }
 
   return [

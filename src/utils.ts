@@ -3,17 +3,59 @@ import fs from 'node:fs'
 import http from 'node:http'
 import https from 'node:https'
 import path from 'node:path'
-import { consola } from 'consola'
 import { pluginName } from './plugin'
 
 /**
- * 创建带插件名前缀的日志函数
+ * ANSI 颜色代码
  */
-function createLogger(level: 'start' | 'success' | 'info' | 'warn') {
+const colors = {
+  reset: '\x1B[0m',
+  cyan: '\x1B[36m',
+  green: '\x1B[32m',
+  blue: '\x1B[34m',
+  yellow: '\x1B[33m',
+  red: '\x1B[31m',
+}
+
+/**
+ * 格式化时间戳
+ */
+function formatTimestamp(): string {
+  const now = new Date()
+  const hours = now.getHours().toString().padStart(2, '0')
+  const minutes = now.getMinutes().toString().padStart(2, '0')
+  const seconds = now.getSeconds().toString().padStart(2, '0')
+  return `${hours}:${minutes}:${seconds}`
+}
+
+/**
+ * 手动实现的日志函数
+ */
+function createLogger(level: 'start' | 'success' | 'info' | 'warn' | 'error') {
   return (message: string, verbose = true): void => {
     if (!verbose)
       return
-    consola[level](`[${pluginName}] ${message}`)
+
+    const timestamp = formatTimestamp()
+    const prefix = `[${pluginName}]`
+
+    switch (level) {
+      case 'start':
+        console.log(`${colors.cyan}◐${colors.reset} ${colors.blue}${timestamp}${colors.reset} ${prefix} ${message}`)
+        break
+      case 'success':
+        console.log(`${colors.green}✔${colors.reset} ${colors.blue}${timestamp}${colors.reset} ${prefix} ${message}`)
+        break
+      case 'info':
+        console.log(`${colors.blue}ℹ${colors.reset} ${colors.blue}${timestamp}${colors.reset} ${prefix} ${message}`)
+        break
+      case 'warn':
+        console.warn(`${colors.yellow}⚠${colors.reset} ${colors.blue}${timestamp}${colors.reset} ${prefix} ${message}`)
+        break
+      case 'error':
+        console.error(`${colors.red}✖${colors.reset} ${colors.blue}${timestamp}${colors.reset} ${prefix} ${message}`)
+        break
+    }
   }
 }
 
@@ -21,6 +63,7 @@ export const startWithTime = createLogger('start')
 export const successWithTime = createLogger('success')
 export const logWithTime = createLogger('info')
 export const warnWithTime = createLogger('warn')
+export const errorWithTime = createLogger('error')
 
 /**
  * 下载文件
@@ -152,7 +195,7 @@ export async function fetchUsbIdsData(
     return { data, source }
   }
   catch (error) {
-    consola.error(`[${pluginName}] 获取USB设备数据失败:`, error)
+    errorWithTime(`获取USB设备数据失败: ${(error as Error).message}`)
     throw error
   }
 }
@@ -177,7 +220,7 @@ export async function saveUsbIdsToFile(
     successWithTime(`USB设备数据已保存到 ${filePath}，包含 ${vendorCount} 个供应商，${deviceCount} 个设备`, verbose)
   }
   catch (error) {
-    consola.error(`[${pluginName}] 保存USB设备数据失败:`, error)
+    errorWithTime(`保存USB设备数据失败: ${(error as Error).message}`)
     throw error
   }
 }

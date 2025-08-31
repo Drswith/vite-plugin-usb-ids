@@ -29,20 +29,23 @@
   "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
-      "virtual": ["src/virtual.d.ts"]
+      "virtual": ["dist/virtual.d.ts"]
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "usb.ids.json"
   ],
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
+    "dev:app": "vite",
     "lint": "eslint",
     "prepublishOnly": "nr build",
     "release": "bumpp && pnpm publish",
     "start": "tsx src/index.ts",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks",
     "lint-staged": "lint-staged"
@@ -55,6 +58,7 @@
     "@antfu/ni": "catalog:cli",
     "@antfu/utils": "catalog:inlined",
     "@types/node": "catalog:types",
+    "@vue/tsconfig": "catalog:utils",
     "bumpp": "catalog:cli",
     "eslint": "catalog:cli",
     "lint-staged": "catalog:cli",

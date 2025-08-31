@@ -28,6 +28,7 @@ catalogs:
   types:
     '@types/node': ^22.13.10
   utils:
+    '@vue/tsconfig': ^0.7.0
     tinyexec: ^0.3.2
 onlyBuiltDependencies:
   - esbuild

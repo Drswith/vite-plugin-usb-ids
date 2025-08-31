@@ -160,13 +160,9 @@ usbIdsPlugin({
 
 ## Example Project
 
-Check out the complete example in the `examples` directory:
+### Online Demo
 
-```bash
-cd examples
-pnpm install
-pnpm dev
-```
+🚀 **[Try it online on StackBlitz](https://stackblitz.com/edit/vite-plugin-usb-ids)**
 
 ## License
 

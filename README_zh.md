@@ -160,13 +160,9 @@ usbIdsPlugin({
 
 ## 示例项目
 
-查看 `examples` 目录中的完整示例：
+### 在线演示
 
-```bash
-cd examples
-pnpm install
-pnpm dev
-```
+🚀 **[在 StackBlitz 上在线体验](https://stackblitz.com/edit/vite-plugin-usb-ids)**
 
 ## 许可证
 

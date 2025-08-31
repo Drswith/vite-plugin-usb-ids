@@ -5,8 +5,8 @@ import https from 'node:https'
 import path from 'node:path'
 import dayjs from 'dayjs'
 
-export interface UsbDevicesPluginOptions {
-  /** fallback文件路径，默认为 'src/assets/usb-device.json' */
+export interface UsbIdsPluginOptions {
+  /** fallback文件路径，默认为 'usb.ids.json' */
   fallbackFile?: string
   /** USB IDs数据源URLs */
   usbIdsUrls?: string[]
@@ -22,23 +22,24 @@ export interface UsbDevice {
 }
 
 export interface UsbVendor {
+  vendor: string
   name: string
   devices: Record<string, UsbDevice>
 }
 
-export type UsbDevicesData = Record<string, UsbVendor>
+export type UsbIdsData = Record<string, UsbVendor>
 
 // 虚拟模块ID
-const VIRTUAL_USB_DEVICES_ID = 'virtual:usb-devices'
-const RESOLVED_USB_DEVICES_ID = `\0${VIRTUAL_USB_DEVICES_ID}`
+const VIRTUAL_USB_IDS_ID = 'virtual:usb-ids'
+const RESOLVED_USB_IDS_ID = `\0${VIRTUAL_USB_IDS_ID}`
 
-const pluginName = 'vite-plugin-usb-devices'
+const pluginName = 'vite-plugin-usb-ids'
 
 /**
  * USB设备数据Vite插件 - 虚拟模块版本
  * 通过虚拟模块注入USB设备数据，无需生成物理文件
  */
-function usbDevicesPlugin(options: UsbDevicesPluginOptions = {}): Plugin {
+function usbIdsPlugin(options: UsbIdsPluginOptions = {}): Plugin {
   const {
     fallbackFile = 'usb.ids.json',
     usbIdsUrls = [
@@ -51,7 +52,7 @@ function usbDevicesPlugin(options: UsbDevicesPluginOptions = {}): Plugin {
 
   let root = ''
   let isDev = false
-  let usbDevicesData: UsbDevicesData | null = null
+  let usbIdsData: UsbIdsData | null = null
 
   /**
    * 带时间戳的日志输出
@@ -103,9 +104,9 @@ function usbDevicesPlugin(options: UsbDevicesPluginOptions = {}): Plugin {
   /**
    * 解析usb.ids文件格式并转换为项目所需的JSON格式
    */
-  function parseUsbIds(content: string): UsbDevicesData {
+  function parseUsbIds(content: string): UsbIdsData {
     const lines = content.split('\n')
-    const result: UsbDevicesData = {}
+    const result: UsbIdsData = {}
     let currentVendor: string | null = null
 
     for (const line of lines) {
@@ -121,6 +122,7 @@ function usbDevicesPlugin(options: UsbDevicesPluginOptions = {}): Plugin {
           const [, vendorId, vendorName] = match
           currentVendor = vendorId.toLowerCase()
           result[currentVendor] = {
+            vendor: vendorId.toLowerCase(),
             name: vendorName.trim(),
             devices: {},
           }
@@ -145,7 +147,7 @@ function usbDevicesPlugin(options: UsbDevicesPluginOptions = {}): Plugin {
   /**
    * 获取USB设备数据
    */
-  async function fetchUsbDevicesData(): Promise<{ data: UsbDevicesData, source: 'api' | 'fallback' }> {
+  async function fetchUsbIdsData(): Promise<{ data: UsbIdsData, source: 'api' | 'fallback' }> {
     const startTime = Date.now()
 
     try {
@@ -167,7 +169,7 @@ function usbDevicesPlugin(options: UsbDevicesPluginOptions = {}): Plugin {
         }
       }
 
-      let data: UsbDevicesData
+      let data: UsbIdsData
       let source: 'api' | 'fallback'
 
       if (usbIdsContent) {
@@ -205,11 +207,11 @@ function usbDevicesPlugin(options: UsbDevicesPluginOptions = {}): Plugin {
   /**
    * 初始化USB设备数据
    */
-  async function initializeUsbDevicesData(): Promise<void> {
+  async function initializeUsbIdsData(): Promise<void> {
     try {
-      const { data } = await fetchUsbDevicesData()
+      const { data } = await fetchUsbIdsData()
 
-      usbDevicesData = data
+      usbIdsData = data
 
       // 输出统计信息
       const vendorCount = Object.keys(data).length
@@ -222,7 +224,7 @@ function usbDevicesPlugin(options: UsbDevicesPluginOptions = {}): Plugin {
     catch (error) {
       console.error('[usb-devices] 初始化USB设备数据失败:', error)
       // 使用空数据作为fallback
-      usbDevicesData = {}
+      usbIdsData = {}
     }
   }
 
@@ -239,33 +241,33 @@ function usbDevicesPlugin(options: UsbDevicesPluginOptions = {}): Plugin {
         // 在开发模式下使用本地fallback数据
         const fallbackPath = path.resolve(root, fallbackFile)
         if (fs.existsSync(fallbackPath)) {
-          usbDevicesData = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'))
+          usbIdsData = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'))
           logWithTime('开发模式使用本地fallback数据')
         }
         else {
-          usbDevicesData = {}
+          usbIdsData = {}
         }
         return
       }
 
       // 初始化USB设备数据
-      await initializeUsbDevicesData()
+      await initializeUsbIdsData()
     },
     resolveId(id) {
-      if (id === VIRTUAL_USB_DEVICES_ID) {
-        return RESOLVED_USB_DEVICES_ID
+      if (id === VIRTUAL_USB_IDS_ID) {
+        return RESOLVED_USB_IDS_ID
       }
     },
     load(id) {
-      if (id === RESOLVED_USB_DEVICES_ID) {
-        // 返回USB设备数据作为ES模块
-        return `export default ${JSON.stringify(usbDevicesData || {})}`
+      if (id === RESOLVED_USB_IDS_ID) {
+        // 返回USB IDs数据作为ES模块
+        return `export default ${JSON.stringify(usbIdsData || {})}`
       }
     },
   }
 }
 
-export { pluginName, RESOLVED_USB_DEVICES_ID, usbDevicesPlugin, VIRTUAL_USB_DEVICES_ID }
+export { pluginName, RESOLVED_USB_IDS_ID, usbIdsPlugin, VIRTUAL_USB_IDS_ID }
 
 // 默认导出
-export default usbDevicesPlugin
+export default usbIdsPlugin

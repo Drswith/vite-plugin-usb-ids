@@ -18,7 +18,7 @@ const pluginName = 'vite-plugin-usb-devices'
  */
 function usbDevicesPlugin(options: UsbDevicesPluginOptions = {}): Plugin {
   const {
-    fallbackFile = 'src/assets/usb-device.json',
+    fallbackFile = 'usb.ids.json',
     usbIdsUrls = [
       'https://raw.githubusercontent.com/systemd/systemd/main/hwdb.d/usb.ids',
       'http://www.linux-usb.org/usb.ids',

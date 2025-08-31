@@ -1,10 +1,32 @@
 import type { Plugin } from 'vite'
-import type { UsbDevicesData, UsbDevicesPluginOptions } from './types'
 import fs from 'node:fs'
 import http from 'node:http'
 import https from 'node:https'
 import path from 'node:path'
 import dayjs from 'dayjs'
+
+export interface UsbDevicesPluginOptions {
+  /** fallback文件路径，默认为 'src/assets/usb-device.json' */
+  fallbackFile?: string
+  /** USB IDs数据源URLs */
+  usbIdsUrls?: string[]
+  /** 是否在开发模式下跳过下载，默认为 true */
+  skipInDev?: boolean
+  /** 是否启用详细日志，默认为 true */
+  verbose?: boolean
+}
+
+export interface UsbDevice {
+  devid: string
+  devname: string
+}
+
+export interface UsbVendor {
+  name: string
+  devices: Record<string, UsbDevice>
+}
+
+export type UsbDevicesData = Record<string, UsbVendor>
 
 // 虚拟模块ID
 const VIRTUAL_USB_DEVICES_ID = 'virtual:usb-devices'

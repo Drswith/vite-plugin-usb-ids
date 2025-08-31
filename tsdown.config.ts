@@ -3,7 +3,6 @@ import { defineConfig } from 'tsdown'
 export default defineConfig((_) => {
   const share = {
     clean: true,
-    tsconfig: 'tsconfig.node.json',
     target: 'node16',
     noExternal: [
       'dayjs',
@@ -31,7 +30,6 @@ export default defineConfig((_) => {
       entry: [
         'src/types.ts',
       ],
-      format: 'esm',
     },
   ]
 })

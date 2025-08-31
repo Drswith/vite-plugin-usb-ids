@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
-import usbIdsPlugin from './src/index'
+import usbIdsPlugin from '../src'
 
 export default defineConfig({
   plugins: [

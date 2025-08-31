@@ -2,7 +2,7 @@ packages:
   - playground
   - docs
   - packages/*
-  - examples/*
+  - examples
 catalog:
   dayjs: ^1.11.18
 

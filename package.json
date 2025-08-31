@@ -21,17 +21,15 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./types": "./dist/types.d.ts",
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js"
+    },
     "./package.json": "./package.json"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "virtual": ["dist/virtual.d.ts"]
-    }
-  },
   "files": [
     "dist",
     "usb.ids.json"
@@ -39,7 +37,6 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
-    "dev:app": "vite",
     "lint": "eslint",
     "prepublishOnly": "nr build",
     "release": "bumpp && pnpm publish",

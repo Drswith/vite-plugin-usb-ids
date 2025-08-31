@@ -47,9 +47,6 @@
     "prepare": "simple-git-hooks",
     "lint-staged": "lint-staged"
   },
-  "dependencies": {
-    "dayjs": "catalog:"
-  },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:cli",
     "@antfu/ni": "catalog:cli",
@@ -57,6 +54,7 @@
     "@types/node": "catalog:types",
     "@vue/tsconfig": "catalog:utils",
     "bumpp": "catalog:cli",
+    "consola": "catalog:cli",
     "eslint": "catalog:cli",
     "lint-staged": "catalog:cli",
     "simple-git-hooks": "catalog:cli",

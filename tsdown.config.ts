@@ -5,7 +5,7 @@ export default defineConfig((_) => {
     clean: true,
     target: 'node16',
     noExternal: [
-      'dayjs',
+      'consola',
     ],
   }
 

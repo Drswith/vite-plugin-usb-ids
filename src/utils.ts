@@ -3,27 +3,24 @@ import fs from 'node:fs'
 import http from 'node:http'
 import https from 'node:https'
 import path from 'node:path'
-import dayjs from 'dayjs'
+import { consola } from 'consola'
+import { pluginName } from './plugin'
 
 /**
- * 带时间戳的日志输出
+ * 创建带插件名前缀的日志函数
  */
-export function logWithTime(message: string, verbose = true): void {
-  if (!verbose)
-    return
-  const timestamp = dayjs().format('YYYY-MM-DD HH:mm:ss')
-  console.log(`[${timestamp}] [usb-devices] ${message}`)
+function createLogger(level: 'start' | 'success' | 'info' | 'warn') {
+  return (message: string, verbose = true): void => {
+    if (!verbose)
+      return
+    consola[level](`[${pluginName}] ${message}`)
+  }
 }
 
-/**
- * 带时间戳的警告输出
- */
-export function warnWithTime(message: string, verbose = true): void {
-  if (!verbose)
-    return
-  const timestamp = dayjs().format('YYYY-MM-DD HH:mm:ss')
-  console.warn(`[${timestamp}] [usb-devices] ${message}`)
-}
+export const startWithTime = createLogger('start')
+export const successWithTime = createLogger('success')
+export const logWithTime = createLogger('info')
+export const warnWithTime = createLogger('warn')
 
 /**
  * 下载文件
@@ -107,7 +104,7 @@ export async function fetchUsbIdsData(
   const startTime = Date.now()
 
   try {
-    logWithTime('开始获取USB设备数据...', verbose)
+    startWithTime('开始获取USB设备数据...', verbose)
 
     let usbIdsContent: string | null = null
     const downloadStartTime = Date.now()
@@ -155,7 +152,7 @@ export async function fetchUsbIdsData(
     return { data, source }
   }
   catch (error) {
-    console.error('[usb-devices] 获取USB设备数据失败:', error)
+    consola.error(`[${pluginName}] 获取USB设备数据失败:`, error)
     throw error
   }
 }
@@ -177,10 +174,10 @@ export async function saveUsbIdsToFile(
       return total + Object.keys(vendor.devices || {}).length
     }, 0)
 
-    logWithTime(`USB设备数据已保存到 ${filePath}，包含 ${vendorCount} 个供应商，${deviceCount} 个设备`, verbose)
+    successWithTime(`USB设备数据已保存到 ${filePath}，包含 ${vendorCount} 个供应商，${deviceCount} 个设备`, verbose)
   }
   catch (error) {
-    console.error('[usb-devices] 保存USB设备数据失败:', error)
+    consola.error(`[${pluginName}] 保存USB设备数据失败:`, error)
     throw error
   }
 }

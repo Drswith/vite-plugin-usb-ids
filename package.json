@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.0",
   "packageManager": "pnpm@10.6.2",
-  "description": "_description_",
+  "description": "A vite plugin to get USB IDs",
   "author": "Drswith",
   "license": "MIT",
   "funding": "https://github.com/sponsors/Drswith",
@@ -34,7 +34,11 @@
     "dist",
     "usb.ids.json"
   ],
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "build": "tsdown",
     "dev": "tsdown --watch",
     "lint": "eslint",
@@ -45,6 +49,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks",
+    "bumpp": "bumpp",
     "lint-staged": "lint-staged"
   },
   "devDependencies": {

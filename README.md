@@ -1,31 +1,33 @@
 # vite-plugin-usb-ids
 
-一个将远程或本地 USB IDs 数据作为虚拟模块注入 Vite 项目的插件。
+[简体中文](./README_zh.md) | English
 
-## 特性
+A Vite plugin that injects remote or local USB IDs data as a virtual module into your Vite project.
 
-- 🚀 **虚拟模块注入** - 通过虚拟模块 `virtual:usb-ids` 直接导入 USB 设备数据
-- 📦 **零配置** - 开箱即用，无需额外配置
-- 🌐 **多数据源** - 支持从多个 URL 获取最新的 USB IDs 数据
-- 💾 **本地缓存** - 自动缓存数据，提升构建性能
-- 🔧 **TypeScript 支持** - 完整的类型定义
-- ⚡ **开发友好** - 开发模式下可选择跳过网络请求
+## Features
 
-## 安装
+- 🚀 **Virtual Module Injection** - Import USB device data directly through the `virtual:usb-ids` virtual module
+- 📦 **Zero Configuration** - Works out of the box with no additional setup required
+- 🌐 **Multiple Data Sources** - Supports fetching the latest USB IDs data from multiple URLs
+- 💾 **Local Caching** - Automatically caches data to improve build performance
+- 🔧 **TypeScript Support** - Complete type definitions included
+- ⚡ **Development Friendly** - Option to skip network requests in development mode
+
+## Installation
 
 ```bash
 npm install -D vite-plugin-usb-ids
-# 或
+# or
 pnpm add -D vite-plugin-usb-ids
-# 或
+# or
 yarn add -D vite-plugin-usb-ids
 ```
 
-## 使用方法
+## Usage
 
-### 1. 配置插件
+### 1. Configure the Plugin
 
-在 `vite.config.ts` 中添加插件：
+Add the plugin to your `vite.config.ts`:
 
 ```typescript
 import { defineConfig } from 'vite'
@@ -34,90 +36,90 @@ import usbIdsPlugin from 'vite-plugin-usb-ids'
 export default defineConfig({
   plugins: [
     usbIdsPlugin({
-      // 配置选项（可选）
-      skipInDev: true, // 开发模式下跳过下载
-      verbose: true, // 启用详细日志
+      // Configuration options (optional)
+      skipInDev: true, // Skip download in development mode
+      verbose: true, // Enable verbose logging
     }),
   ],
 })
 ```
 
-### 2. 在代码中使用
+### 2. Use in Your Code
 
 ```typescript
-// 导入 USB IDs 数据
+// Import USB IDs data
 import usbIdsData from 'virtual:usb-ids'
 
-// 使用数据
+// Use the data
 console.log(usbIdsData)
 
-// 查找特定厂商
+// Find a specific vendor
 const vendor = usbIdsData['1d6b'] // Linux Foundation
 console.log(vendor.name) // "Linux Foundation"
 
-// 查找特定设备
+// Find a specific device
 const device = vendor.devices['0001']
 console.log(device.devname) // "1.1 root hub"
 ```
 
-### 3. TypeScript 类型支持
+### 3. TypeScript Support
 
-创建 `vite-env.d.ts` 文件（如果还没有）：
+Create a `vite-env.d.ts` file (if you don't have one already):
 
 ```typescript
 /// <reference types="vite/client" />
-/// <reference types="vite-plugin-usb-ids/types" />
+/// <reference types="vite-plugin-usb-ids/client" />
 ```
 
-或在 `tsconfig.json` 中添加：
+Or add to your `tsconfig.json`:
 ```json
 {
   "compilerOptions": {
     "types": [
-      "vite-plugin-usb-ids/types"
+      "vite-plugin-usb-ids/client"
     ]
   }
 }
 ```
 
-## 配置选项
+## Configuration Options
 
-```ts
+```typescript
 interface UsbIdsPluginOptions {
-  /** fallback文件路径，默认为插件包内的 usb.ids.json */
+  /** Fallback file path, defaults to usb.ids.json in the plugin package */
   fallbackFile?: string
 
-  /** USB IDs数据源URLs */
+  /** USB IDs data source URLs */
   usbIdsUrls?: string[]
 
-  /** 是否在开发模式下跳过下载，默认为 true */
+  /** Whether to skip download in development mode, defaults to true */
   skipInDev?: boolean
 
-  /** 是否启用详细日志，默认为 true */
+  /** Whether to enable verbose logging, defaults to true */
   verbose?: boolean
 }
 ```
 
-## 数据结构
+## Data Structure
 
-插件提供的数据结构如下：
+The plugin provides data with the following structure:
 
 ```typescript
 interface UsbDevice {
-  devid: string // 设备ID
-  devname: string // 设备名称
+  devid: string // Device ID
+  devname: string // Device name
 }
 
 interface UsbVendor {
-  vendor: string // 厂商ID
-  name: string // 厂商名称
+  vendor: string // Vendor ID
+  name: string // Vendor name
   devices: Record<string, UsbDevice>
 }
 
 type UsbIdsData = Record<string, UsbVendor>
 ```
 
-### 数据示例
+### Data Example
 
 ```json
 {
@@ -138,17 +140,17 @@ type UsbIdsData = Record<string, UsbVendor>
 }
 ```
 
-## 工作原理
+## How It Works
 
-1. **数据获取**：插件启动时从配置的 URL 列表依次尝试下载最新的 USB IDs 数据
-2. **数据解析**：将原始的 USB IDs 格式解析为结构化的 JSON 数据
-3. **虚拟模块**：通过 Vite 的虚拟模块机制，将数据注入为 `virtual:usb-ids` 模块
-4. **缓存机制**：解析后的数据会缓存到本地，避免重复处理
-5. **降级处理**：如果网络请求失败，会使用插件包内置的备用数据
+1. **Data Fetching**: The plugin attempts to download the latest USB IDs data from the configured URL list when it starts
+2. **Data Parsing**: Parses the raw USB IDs format into structured JSON data
+3. **Virtual Module**: Injects the data as a `virtual:usb-ids` module through Vite's virtual module mechanism
+4. **Caching**: Parsed data is cached locally to avoid repeated processing
+5. **Fallback**: If network requests fail, the plugin uses built-in backup data
 
-## 开发模式
+## Development Mode
 
-默认情况下，插件在开发模式下会跳过网络请求（`skipInDev: true`），直接使用本地缓存或备用数据，以提升开发体验。如需在开发时也获取最新数据，可设置：
+By default, the plugin skips network requests in development mode (`skipInDev: true`) and uses local cache or fallback data to improve development experience. To fetch the latest data during development, set:
 
 ```typescript
 usbIdsPlugin({
@@ -156,9 +158,9 @@ usbIdsPlugin({
 })
 ```
 
-## 示例项目
+## Example Project
 
-查看 `examples` 目录中的完整示例：
+Check out the complete example in the `examples` directory:
 
 ```bash
 cd examples
@@ -166,15 +168,15 @@ pnpm install
 pnpm dev
 ```
 
-## 许可证
+## License
 
 MIT
 
-## 贡献
+## Contributing
 
-欢迎提交 Issue 和 Pull Request！
+Issues and Pull Requests are welcome!
 
-## 相关链接
+## Related Links
 
 - [USB ID Repository](http://www.linux-usb.org/usb-ids.html)
 - [Systemd USB IDs](https://github.com/systemd/systemd/blob/main/hwdb.d/usb.ids)

@@ -21,9 +21,8 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./types": {
-      "types": "./dist/types.d.ts",
-      "import": "./dist/types.js"
+    "./client": {
+      "types": "./client.d.ts"
     },
     "./package.json": "./package.json"
   },

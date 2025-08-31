@@ -1,0 +1,78 @@
+{
+  "name": "vite-plugin-usb-ids",
+  "type": "module",
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.6.2",
+  "description": "_description_",
+  "author": "Drswith",
+  "license": "MIT",
+  "funding": "https://github.com/sponsors/Drswith",
+  "homepage": "https://github.com/Drswith/vite-plugin-usb-ids#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Drswith/vite-plugin-usb-ids.git"
+  },
+  "bugs": "https://github.com/Drswith/vite-plugin-usb-ids/issues",
+  "keywords": [],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./types": "./dist/types.d.ts",
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "virtual": ["src/virtual.d.ts"]
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "lint": "eslint",
+    "prepublishOnly": "nr build",
+    "release": "bumpp && pnpm publish",
+    "start": "tsx src/index.ts",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepare": "simple-git-hooks",
+    "lint-staged": "lint-staged"
+  },
+  "dependencies": {
+    "dayjs": "catalog:"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "catalog:cli",
+    "@antfu/ni": "catalog:cli",
+    "@antfu/utils": "catalog:inlined",
+    "@types/node": "catalog:types",
+    "bumpp": "catalog:cli",
+    "eslint": "catalog:cli",
+    "lint-staged": "catalog:cli",
+    "simple-git-hooks": "catalog:cli",
+    "tinyexec": "catalog:utils",
+    "tsdown": "catalog:cli",
+    "tsx": "catalog:cli",
+    "typescript": "catalog:cli",
+    "unbuild": "catalog:cli",
+    "vite": "catalog:cli",
+    "vitest": "catalog:testing",
+    "vitest-package-exports": "catalog:testing",
+    "yaml": "catalog:testing"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "nr lint-staged"
+  },
+  "lint-staged": {
+    "*": "eslint --fix"
+  }
+}

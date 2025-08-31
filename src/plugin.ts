@@ -2,6 +2,7 @@ import type { Plugin } from 'vite'
 import type { UsbIdsData, UsbIdsPluginOptions } from './typing'
 import fs from 'node:fs'
 import path from 'node:path'
+import process from 'node:process'
 import { fetchUsbIdsData, logWithTime } from './utils'
 
 // 虚拟模块ID
@@ -15,8 +16,12 @@ const pluginName = 'vite-plugin-usb-ids'
  * 通过虚拟模块注入USB设备数据，无需生成物理文件
  */
 function usbIdsPlugin(options: UsbIdsPluginOptions = {}): Plugin {
+  let root = process.cwd()
+  let isDev = false
+  let usbIdsData: UsbIdsData | null = null
+
   const {
-    fallbackFile = 'usb.ids.json',
+    fallbackFile = path.resolve(root, 'node_modules', 'vite-plugin-usb-ids', 'usb.ids.json'),
     usbIdsUrls = [
       'https://raw.githubusercontent.com/systemd/systemd/main/hwdb.d/usb.ids',
       'http://www.linux-usb.org/usb.ids',
@@ -24,11 +29,6 @@ function usbIdsPlugin(options: UsbIdsPluginOptions = {}): Plugin {
     skipInDev = true,
     verbose = true,
   } = options
-
-  let root = ''
-  let isDev = false
-  let usbIdsData: UsbIdsData | null = null
-
   /**
    * 初始化USB设备数据
    */
@@ -89,7 +89,9 @@ declare module 'virtual:usb-ids' {
       if (isDev && skipInDev) {
         logWithTime('开发模式下跳过USB设备数据生成', verbose)
         // 在开发模式下使用本地fallback数据
-        const fallbackPath = path.resolve(root, fallbackFile)
+        const fallbackPath = path.resolve(root, 'node_modules', 'vite-plugin-usb-ids', fallbackFile)
+        // 检查是否存在本地fallback文件
+        logWithTime(`检查fallback文件: ${fallbackPath}`, verbose)
         if (fs.existsSync(fallbackPath)) {
           usbIdsData = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'))
           logWithTime('开发模式使用本地fallback数据', verbose)

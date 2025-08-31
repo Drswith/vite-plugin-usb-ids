@@ -3,6 +3,8 @@ import usbIdsPlugin from '../src'
 
 export default defineConfig({
   plugins: [
-    usbIdsPlugin(),
+    usbIdsPlugin({
+      // skipInDev: false,
+    }),
   ],
 })

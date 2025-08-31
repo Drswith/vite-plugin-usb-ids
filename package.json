@@ -42,6 +42,7 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "fetch-usb-ids": "tsx scripts/fetch-usb-ids.ts",
     "release": "bumpp && pnpm publish",
     "start": "tsx src/index.ts",

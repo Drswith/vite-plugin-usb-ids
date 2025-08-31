@@ -25,11 +25,5 @@ export default defineConfig((_) => {
       dts: false,
       format: 'cjs',
     },
-    {
-      ...share,
-      entry: [
-        'src/types.ts',
-      ],
-    },
   ]
 })

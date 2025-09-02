@@ -45,8 +45,33 @@ export default defineConfig({
 
 ### 2. 在代码中使用
 
+#### 推荐：异步导入（动态导入）
+
 ```typescript
-// 导入 USB IDs 数据
+// 推荐：使用动态导入以获得更好的性能
+async function loadUsbData() {
+  const usbIdsData = await import('virtual:usb-ids').then(m => m.default)
+
+  // 使用数据
+  console.log(usbIdsData)
+
+  // 查找特定厂商
+  const vendor = usbIdsData['1d6b'] // Linux Foundation
+  console.log(vendor.name) // "Linux Foundation"
+
+  // 查找特定设备
+  const device = vendor.devices['0001']
+  console.log(device.devname) // "1.1 root hub"
+}
+
+// 在需要时调用
+loadUsbData()
+```
+
+#### 替代方案：同步导入（静态导入）
+
+```typescript
+// 替代方案：直接导入（在模块解析时加载）
 import usbIdsData from 'virtual:usb-ids'
 
 // 使用数据
@@ -61,9 +86,21 @@ const device = vendor.devices['0001']
 console.log(device.devname) // "1.1 root hub"
 ```
 
+#### 为什么推荐异步导入
+
+**性能优势：**
+- **代码分割**：动态导入会创建独立的代码块，减少初始包体积
+- **懒加载**：USB IDs 数据仅在实际需要时才加载
+- **更好的用户体验**：更快的初始页面加载，因为 USB 数据（可能很大）不会阻塞主包
+
+**使用场景：**
+- **条件加载**：仅在用户与 USB 相关功能交互时加载 USB 数据
+- **路由级加载**：只在需要的特定路由中加载 USB 数据
+- **按需功能**：适用于设备检测或硬件管理面板等功能
+
 ### 3. TypeScript 类型支持
 
-插件会自动生成 TypeScript 类型定义。要获得虚拟模块的类型支持，请在您的 `vite-env.d.ts` 文件中添加类型引用：
+插件包中包含了 TypeScript 类型定义。要获得虚拟模块的类型支持，请在您的 `vite-env.d.ts` 文件中添加类型引用：
 
 ```typescript
 /// <reference types="vite/client" />
@@ -81,7 +118,7 @@ console.log(device.devname) // "1.1 root hub"
 }
 ```
 
-**注意**：插件会在构建过程中自动在您的 `node_modules/vite-plugin-usb-ids/` 目录下生成 `client.d.ts` 文件。
+**注意**：`client.d.ts` 文件包含在已发布的包中，为 `virtual:usb-ids` 模块提供类型定义。
 
 ## 配置选项
 

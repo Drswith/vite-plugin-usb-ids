@@ -45,8 +45,33 @@ export default defineConfig({
 
 ### 2. Use in Your Code
 
+#### Recommended: Async Import (Dynamic Import)
+
 ```typescript
-// Import USB IDs data
+// Recommended: Use dynamic import for better performance
+async function loadUsbData() {
+  const usbIdsData = await import('virtual:usb-ids').then(m => m.default)
+
+  // Use the data
+  console.log(usbIdsData)
+
+  // Find a specific vendor
+  const vendor = usbIdsData['1d6b'] // Linux Foundation
+  console.log(vendor.name) // "Linux Foundation"
+
+  // Find a specific device
+  const device = vendor.devices['0001']
+  console.log(device.devname) // "1.1 root hub"
+}
+
+// Call when needed
+loadUsbData()
+```
+
+#### Alternative: Sync Import (Static Import)
+
+```typescript
+// Alternative: Direct import (loaded at module parse time)
 import usbIdsData from 'virtual:usb-ids'
 
 // Use the data
@@ -61,9 +86,21 @@ const device = vendor.devices['0001']
 console.log(device.devname) // "1.1 root hub"
 ```
 
+#### Why Async Import is Recommended
+
+**Performance Benefits:**
+- **Code Splitting**: Dynamic imports create separate chunks, reducing initial bundle size
+- **Lazy Loading**: USB IDs data is only loaded when actually needed
+- **Better UX**: Faster initial page load as the USB data (which can be large) doesn't block the main bundle
+
+**Use Cases:**
+- **Conditional Loading**: Only load USB data when user interacts with USB-related features
+- **Route-based Loading**: Load USB data only in specific routes that need it
+- **On-demand Features**: Perfect for features like device detection or hardware management panels
+
 ### 3. TypeScript Support
 
-The plugin automatically generates TypeScript definitions. To get type support for the virtual module, add the type reference to your `vite-env.d.ts` file:
+The plugin includes TypeScript definitions in the package. To get type support for the virtual module, add the type reference to your `vite-env.d.ts` file:
 
 ```typescript
 /// <reference types="vite/client" />
@@ -81,7 +118,7 @@ Or add to your `tsconfig.json`:
 }
 ```
 
-**Note**: The plugin automatically generates the `client.d.ts` file in your `node_modules/vite-plugin-usb-ids/` directory during the build process.
+**Note**: The `client.d.ts` file is included in the published package and provides type definitions for the `virtual:usb-ids` module.
 
 ## Configuration Options
 

@@ -1,7 +1,7 @@
 {
   "name": "vite-plugin-usb-ids",
   "type": "module",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "packageManager": "pnpm@9.15.9",
   "description": "A vite plugin to get USB ID's Data and generate a virtual esm module",
   "author": "Drswith",

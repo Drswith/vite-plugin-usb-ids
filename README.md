@@ -2,16 +2,15 @@
 
 [简体中文](./README_zh.md) | English
 
-A Vite plugin that injects remote or local USB IDs data as a virtual module into your Vite project.
+A Vite plugin that injects remote USB IDs data as a virtual module into your Vite project.
 
 ## Features
 
 - 🚀 **Virtual Module Injection** - Import USB device data directly through the `virtual:usb-ids` virtual module
 - 📦 **Zero Configuration** - Works out of the box with no additional setup required
-- 🌐 **Multiple Data Sources** - Supports fetching the latest USB IDs data from multiple URLs
-- 💾 **Local Caching** - Automatically caches data to improve build performance
-- 🔧 **TypeScript Support** - Complete type definitions included
-- ⚡ **Development Friendly** - Option to skip network requests in development mode
+- 🌐 **Multiple Data Sources** - Supports fetching the latest USB IDs data from multiple URLs with automatic fallback
+- 🔧 **TypeScript Support** - Automatic type definition generation for virtual modules
+- ⚡ **Build-time Data Fetching** - Downloads and parses USB IDs data during the build process
 
 ## Installation
 
@@ -36,9 +35,9 @@ import usbIdsPlugin from 'vite-plugin-usb-ids'
 export default defineConfig({
   plugins: [
     usbIdsPlugin({
-      // Configuration options (optional)
-      skipInDev: true, // Skip download in development mode
-      verbose: true, // Enable verbose logging
+      // Configuration options (all optional)
+      usbIdsUrls: ['https://custom-source.com/usb.ids'], // Custom USB IDs data sources
+      verbose: true, // Enable verbose logging (default: true)
     }),
   ],
 })
@@ -64,7 +63,7 @@ console.log(device.devname) // "1.1 root hub"
 
 ### 3. TypeScript Support
 
-Create a `vite-env.d.ts` file (if you don't have one already):
+The plugin automatically generates TypeScript definitions. To get type support for the virtual module, add the type reference to your `vite-env.d.ts` file:
 
 ```typescript
 /// <reference types="vite/client" />
@@ -82,23 +81,27 @@ Or add to your `tsconfig.json`:
 }
 ```
 
+**Note**: The plugin automatically generates the `client.d.ts` file in your `node_modules/vite-plugin-usb-ids/` directory during the build process.
+
 ## Configuration Options
 
 ```typescript
 interface UsbIdsPluginOptions {
-  /** Fallback file path, defaults to usb.ids.json in the plugin package */
-  fallbackFile?: string
-
   /** USB IDs data source URLs */
   usbIdsUrls?: string[]
-
-  /** Whether to skip download in development mode, defaults to true */
-  skipInDev?: boolean
 
   /** Whether to enable verbose logging, defaults to true */
   verbose?: boolean
 }
 ```
+
+### Default Data Sources
+
+The plugin uses the following default USB IDs data sources:
+- `http://www.linux-usb.org/usb.ids`
+- `https://raw.githubusercontent.com/systemd/systemd/main/hwdb.d/usb.ids`
+
+If you provide custom `usbIdsUrls`, they will be tried first, followed by the default sources as fallback.
 
 ## Data Structure
 
@@ -142,19 +145,22 @@ type UsbIdsData = Record<string, UsbVendor>
 
 ## How It Works
 
-1. **Data Fetching**: The plugin attempts to download the latest USB IDs data from the configured URL list when it starts
-2. **Data Parsing**: Parses the raw USB IDs format into structured JSON data
-3. **Virtual Module**: Injects the data as a `virtual:usb-ids` module through Vite's virtual module mechanism
-4. **Caching**: Parsed data is cached locally to avoid repeated processing
-5. **Fallback**: If network requests fail, the plugin uses built-in backup data
+1. **Build-time Initialization**: During Vite's `buildStart` phase, the plugin fetches USB IDs data from configured sources
+2. **Data Fetching**: Attempts to download from custom URLs first, then falls back to default sources
+3. **Data Parsing**: Parses the raw USB IDs format into structured JSON data
+4. **Type Generation**: Automatically generates TypeScript definitions for the virtual module
+5. **Virtual Module**: Injects the parsed data as a `virtual:usb-ids` module through Vite's virtual module mechanism
+6. **Fallback Handling**: If all network requests fail, the plugin provides empty data to prevent build errors
 
 ## Development Mode
 
-By default, the plugin skips network requests in development mode (`skipInDev: true`) and uses local cache or fallback data to improve development experience. To fetch the latest data during development, set:
+The plugin fetches USB IDs data during both development and production builds. The data fetching happens during Vite's build start phase, ensuring consistent behavior across different modes.
+
+If you want to reduce console output during development, you can disable verbose logging:
 
 ```typescript
 usbIdsPlugin({
-  skipInDev: false
+  verbose: false
 })
 ```
 

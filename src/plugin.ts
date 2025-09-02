@@ -1,8 +1,5 @@
 import type { Plugin } from 'vite'
 import type { UsbIdsData, UsbIdsPluginOptions } from './typing'
-import fs from 'node:fs'
-import path from 'node:path'
-import process from 'node:process'
 import { USB_IDS_SOURCE } from './config'
 import { fetchUsbIdsData, logger } from './utils'
 
@@ -17,7 +14,6 @@ const pluginName = 'vite-plugin-usb-ids'
  * 通过虚拟模块注入USB设备数据，无需生成物理文件
  */
 function usbIdsPlugin(options: UsbIdsPluginOptions = {}): Plugin {
-  let root = process.cwd()
   let usbIdsData: UsbIdsData | null = null
 
   const {
@@ -48,37 +44,9 @@ function usbIdsPlugin(options: UsbIdsPluginOptions = {}): Plugin {
     }
   }
 
-  /**
-   * 生成虚拟模块类型定义文件
-   */
-  async function generateTypesFile(): Promise<void> {
-    const typesFilePath = path.resolve(root, 'node_modules', 'vite-plugin-usb-ids', 'client.d.ts')
-    const typesContent = `
-// 虚拟模块类型声明
-// 用户需要在他们的项目中引用这个文件来获得 'virtual:usb-ids' 的类型支持
-// 例如：在 vite-env.d.ts 中添加：/// <reference types="vite-plugin-usb-ids/client" />
-// 或在 tsconfig.json 中添加："types": ["vite-plugin-usb-ids/client"]
-declare module 'virtual:usb-ids' {
-  import type { UsbIdsData } from 'vite-plugin-usb-ids'
-  const usbIdsData: UsbIdsData
-  export default usbIdsData
-}`
-    // 创建
-    fs.mkdirSync(path.dirname(typesFilePath), { recursive: true })
-    // 写入类型定义文件
-    fs.writeFileSync(typesFilePath, typesContent)
-    logger.info(`类型定义文件已生成: ${typesFilePath}`, verbose)
-  }
-
   return {
     name: pluginName,
-    configResolved(config) {
-      root = config.root
-    },
     async buildStart() {
-      // 生成虚拟模块类型定义文件
-      await generateTypesFile()
-
       // 初始化USB设备数据
       await initializeUsbIdsData()
     },

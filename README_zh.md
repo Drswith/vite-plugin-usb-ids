@@ -2,16 +2,15 @@
 
 简体中文 | [English](./README.md)
 
-一个将远程或本地 USB IDs 数据作为虚拟模块注入 Vite 项目的插件。
+一个将远程 USB IDs 数据作为虚拟模块注入 Vite 项目的插件。
 
 ## 特性
 
 - 🚀 **虚拟模块注入** - 通过虚拟模块 `virtual:usb-ids` 直接导入 USB 设备数据
 - 📦 **零配置** - 开箱即用，无需额外配置
-- 🌐 **多数据源** - 支持从多个 URL 获取最新的 USB IDs 数据
-- 💾 **本地缓存** - 自动缓存数据，提升构建性能
-- 🔧 **TypeScript 支持** - 完整的类型定义
-- ⚡ **开发友好** - 开发模式下可选择跳过网络请求
+- 🌐 **多数据源** - 支持从多个 URL 获取最新的 USB IDs 数据，自动回退机制
+- 🔧 **TypeScript 支持** - 自动生成虚拟模块的类型定义
+- ⚡ **构建时数据获取** - 在构建过程中下载和解析 USB IDs 数据
 
 ## 安装
 
@@ -36,9 +35,9 @@ import usbIdsPlugin from 'vite-plugin-usb-ids'
 export default defineConfig({
   plugins: [
     usbIdsPlugin({
-      // 配置选项（可选）
-      skipInDev: true, // 开发模式下跳过下载
-      verbose: true, // 启用详细日志
+      // 配置选项（全部可选）
+      usbIdsUrls: ['https://custom-source.com/usb.ids'], // 自定义 USB IDs 数据源
+      verbose: true, // 启用详细日志（默认：true）
     }),
   ],
 })
@@ -64,7 +63,7 @@ console.log(device.devname) // "1.1 root hub"
 
 ### 3. TypeScript 类型支持
 
-创建 `vite-env.d.ts` 文件（如果还没有）：
+插件会自动生成 TypeScript 类型定义。要获得虚拟模块的类型支持，请在您的 `vite-env.d.ts` 文件中添加类型引用：
 
 ```typescript
 /// <reference types="vite/client" />
@@ -82,23 +81,27 @@ console.log(device.devname) // "1.1 root hub"
 }
 ```
 
+**注意**：插件会在构建过程中自动在您的 `node_modules/vite-plugin-usb-ids/` 目录下生成 `client.d.ts` 文件。
+
 ## 配置选项
 
 ```typescript
 interface UsbIdsPluginOptions {
-  /** fallback文件路径，默认为插件包内的 usb.ids.json */
-  fallbackFile?: string
-
   /** USB IDs数据源URLs */
   usbIdsUrls?: string[]
-
-  /** 是否在开发模式下跳过下载，默认为 true */
-  skipInDev?: boolean
 
   /** 是否启用详细日志，默认为 true */
   verbose?: boolean
 }
 ```
+
+### 默认数据源
+
+插件使用以下默认 USB IDs 数据源：
+- `http://www.linux-usb.org/usb.ids`
+- `https://raw.githubusercontent.com/systemd/systemd/main/hwdb.d/usb.ids`
+
+如果您提供了自定义的 `usbIdsUrls`，插件会首先尝试这些 URL，然后回退到默认数据源。
 
 ## 数据结构
 
@@ -142,19 +145,22 @@ type UsbIdsData = Record<string, UsbVendor>
 
 ## 工作原理
 
-1. **数据获取**：插件启动时从配置的 URL 列表依次尝试下载最新的 USB IDs 数据
-2. **数据解析**：将原始的 USB IDs 格式解析为结构化的 JSON 数据
-3. **虚拟模块**：通过 Vite 的虚拟模块机制，将数据注入为 `virtual:usb-ids` 模块
-4. **缓存机制**：解析后的数据会缓存到本地，避免重复处理
-5. **降级处理**：如果网络请求失败，会使用插件包内置的备用数据
+1. **构建时初始化**：在 Vite 的 `buildStart` 阶段，插件从配置的数据源获取 USB IDs 数据
+2. **数据获取**：首先尝试从自定义 URL 下载，然后回退到默认数据源
+3. **数据解析**：将原始的 USB IDs 格式解析为结构化的 JSON 数据
+4. **类型生成**：自动为虚拟模块生成 TypeScript 类型定义
+5. **虚拟模块**：通过 Vite 的虚拟模块机制，将解析后的数据注入为 `virtual:usb-ids` 模块
+6. **错误处理**：如果所有网络请求都失败，插件提供空数据以防止构建错误
 
 ## 开发模式
 
-默认情况下，插件在开发模式下会跳过网络请求（`skipInDev: true`），直接使用本地缓存或备用数据，以提升开发体验。如需在开发时也获取最新数据，可设置：
+插件在开发和生产构建期间都会获取 USB IDs 数据。数据获取发生在 Vite 的构建启动阶段，确保不同模式下的行为一致。
+
+如果您想在开发期间减少控制台输出，可以禁用详细日志：
 
 ```typescript
 usbIdsPlugin({
-  skipInDev: false
+  verbose: false
 })
 ```
 

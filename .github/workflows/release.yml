@@ -47,9 +47,6 @@ jobs:
       - name: Install
         run: nci
 
-      - name: Get Remote
-        run: nr fetch-usb-ids
-
       - name: Build
         run: nr build
 

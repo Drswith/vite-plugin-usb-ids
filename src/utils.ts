@@ -1,8 +1,6 @@
 import type { UsbIdsData } from './typing'
-import fs from 'node:fs'
 import http from 'node:http'
 import https from 'node:https'
-import path from 'node:path'
 import { pluginName } from './plugin'
 
 /**
@@ -59,11 +57,13 @@ function createLogger(level: 'start' | 'success' | 'info' | 'warn' | 'error') {
   }
 }
 
-export const startWithTime = createLogger('start')
-export const successWithTime = createLogger('success')
-export const logWithTime = createLogger('info')
-export const warnWithTime = createLogger('warn')
-export const errorWithTime = createLogger('error')
+export const logger = {
+  start: createLogger('start'),
+  success: createLogger('success'),
+  info: createLogger('info'),
+  warn: createLogger('warn'),
+  error: createLogger('error'),
+}
 
 /**
  * 下载文件
@@ -72,7 +72,7 @@ export function downloadFile(url: string, verbose = true): Promise<string> {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http
 
-    logWithTime(`正在从 ${url} 下载USB设备数据...`, verbose)
+    logger.info(`正在从 ${url} 下载USB设备数据...`, verbose)
 
     client.get(`${url}?_t=${Date.now()}`, (res) => {
       if (res.statusCode !== 200) {
@@ -140,14 +140,12 @@ export function parseUsbIds(content: string): UsbIdsData {
  */
 export async function fetchUsbIdsData(
   usbIdsUrls: string[],
-  fallbackFile: string,
-  root: string,
   verbose = true,
-): Promise<{ data: UsbIdsData, source: 'api' | 'fallback' }> {
+): Promise<{ data: UsbIdsData }> {
   const startTime = Date.now()
 
   try {
-    startWithTime('开始获取USB设备数据...', verbose)
+    logger.info('开始获取USB设备数据...', verbose)
 
     let usbIdsContent: string | null = null
     const downloadStartTime = Date.now()
@@ -157,70 +155,34 @@ export async function fetchUsbIdsData(
       try {
         usbIdsContent = await downloadFile(url, verbose)
         const downloadTime = Date.now() - downloadStartTime
-        logWithTime(`成功从 ${url} 下载数据 (耗时: ${downloadTime}ms)`, verbose)
+        logger.info(`成功从 ${url} 下载数据 (耗时: ${downloadTime}ms)`, verbose)
         break
       }
       catch (error) {
-        warnWithTime(`从 ${url} 下载失败: ${(error as Error).message}`, verbose)
+        logger.warn(`从 ${url} 下载失败: ${(error as Error).message}`, verbose)
       }
     }
 
     let data: UsbIdsData
-    let source: 'api' | 'fallback'
 
     if (usbIdsContent) {
       const parseStartTime = Date.now()
-      logWithTime('解析USB设备数据...', verbose)
+      logger.info('解析USB设备数据...', verbose)
       data = parseUsbIds(usbIdsContent)
       const parseTime = Date.now() - parseStartTime
-      logWithTime(`解析完成，共 ${Object.keys(data).length} 个供应商 (耗时: ${parseTime}ms)`, verbose)
-      source = 'api'
+      logger.info(`解析完成，共 ${Object.keys(data).length} 个供应商 (耗时: ${parseTime}ms)`, verbose)
     }
     else {
-      warnWithTime('所有公共API都无法访问，使用本地fallback文件', verbose)
-      const fallbackPath = path.resolve(root, fallbackFile)
-      if (fs.existsSync(fallbackPath)) {
-        data = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'))
-        logWithTime('使用本地fallback文件', verbose)
-        source = 'fallback'
-      }
-      else {
-        throw new Error('无法获取USB设备数据，本地fallback文件也不存在')
-      }
+      throw new Error('未找到USB设备数据')
     }
 
     const totalTime = Date.now() - startTime
-    logWithTime(`数据获取完成 (总耗时: ${totalTime}ms)`, verbose)
+    logger.info(`数据获取完成 (总耗时: ${totalTime}ms)`, verbose)
 
-    return { data, source }
+    return { data }
   }
   catch (error) {
-    errorWithTime(`获取USB设备数据失败: ${(error as Error).message}`)
-    throw error
-  }
-}
-
-/**
- * 保存USB设备数据到JSON文件
- */
-export async function saveUsbIdsToFile(
-  data: UsbIdsData,
-  filePath: string,
-  verbose = true,
-): Promise<void> {
-  try {
-    const jsonContent = JSON.stringify(data, null, 2)
-    fs.writeFileSync(filePath, jsonContent, 'utf8')
-
-    const vendorCount = Object.keys(data).length
-    const deviceCount = Object.values(data).reduce((total, vendor) => {
-      return total + Object.keys(vendor.devices || {}).length
-    }, 0)
-
-    successWithTime(`USB设备数据已保存到 ${filePath}，包含 ${vendorCount} 个供应商，${deviceCount} 个设备`, verbose)
-  }
-  catch (error) {
-    errorWithTime(`保存USB设备数据失败: ${(error as Error).message}`)
+    logger.error(`获取USB设备数据失败: ${(error as Error).message}`)
     throw error
   }
 }

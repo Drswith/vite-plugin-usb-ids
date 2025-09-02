@@ -73,7 +73,7 @@
     "yaml": "^2.7.0"
   },
   "simple-git-hooks": {
-    "pre-commit": "nr lint-staged"
+    "pre-commit": "pnpm run lint-staged"
   },
   "lint-staged": {
     "*": "eslint --fix"

@@ -42,14 +42,12 @@
     "dev": "tsdown --watch",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "fetch-usb-ids": "tsx scripts/fetch-usb-ids.ts",
     "release": "bumpp && pnpm publish",
-    "start": "tsx src/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks",
-    "bumpp": "bumpp",
+    "tag": "bumpp",
     "lint-staged": "lint-staged"
   },
   "devDependencies": {

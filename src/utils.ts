@@ -4,7 +4,7 @@ import https from 'node:https'
 import { pluginName } from './plugin'
 
 /**
- * ANSI 颜色代码
+ * ANSI color codes
  */
 const colors = {
   reset: '\x1B[0m',
@@ -16,7 +16,7 @@ const colors = {
 }
 
 /**
- * 格式化时间戳
+ * Format timestamp
  */
 function formatTimestamp(): string {
   const now = new Date()
@@ -27,7 +27,7 @@ function formatTimestamp(): string {
 }
 
 /**
- * 手动实现的日志函数
+ * Manually implemented logger function
  */
 function createLogger(level: 'start' | 'success' | 'info' | 'warn' | 'error') {
   return (message: string, verbose = true): void => {
@@ -66,13 +66,13 @@ export const logger = {
 }
 
 /**
- * 下载文件
+ * Download file
  */
 export function downloadFile(url: string, verbose = true): Promise<string> {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http
 
-    logger.info(`正在从 ${url} 下载USB设备数据...`, verbose)
+    logger.info(`Downloading USB device data from ${url}...`, verbose)
 
     client.get(`${url}?_t=${Date.now()}`, (res) => {
       if (res.statusCode !== 200) {
@@ -93,7 +93,7 @@ export function downloadFile(url: string, verbose = true): Promise<string> {
 }
 
 /**
- * 解析usb.ids文件格式并转换为项目所需的JSON格式
+ * Parse usb.ids file format and convert to JSON format required by the project
  */
 export function parseUsbIds(content: string): UsbIdsData {
   const lines = content.split('\n')
@@ -101,12 +101,12 @@ export function parseUsbIds(content: string): UsbIdsData {
   let currentVendor: string | null = null
 
   for (const line of lines) {
-    // 跳过注释和空行
+    // Skip comments and empty lines
     if (line.startsWith('#') || line.trim() === '') {
       continue
     }
 
-    // 供应商行（不以制表符开头）
+    // Vendor line (not starting with tab)
     if (!line.startsWith('\t')) {
       const match = line.match(/^([0-9a-f]{4})\s(.+)$/i)
       if (match) {
@@ -119,7 +119,7 @@ export function parseUsbIds(content: string): UsbIdsData {
         }
       }
     }
-    // 设备行（以一个制表符开头）
+    // Device line (starting with one tab)
     else if (line.startsWith('\t') && !line.startsWith('\t\t') && currentVendor) {
       const match = line.match(/^\t([0-9a-f]{4})\s(.+)$/i)
       if (match) {
@@ -136,7 +136,7 @@ export function parseUsbIds(content: string): UsbIdsData {
 }
 
 /**
- * 获取USB设备数据
+ * Get USB device data
  */
 export async function fetchUsbIdsData(
   usbIdsUrls: string[],
@@ -145,21 +145,21 @@ export async function fetchUsbIdsData(
   const startTime = Date.now()
 
   try {
-    logger.info('开始获取USB设备数据...', verbose)
+    logger.info('Starting to fetch USB device data...', verbose)
 
     let usbIdsContent: string | null = null
     const downloadStartTime = Date.now()
 
-    // 尝试从多个URL下载
+    // Try downloading from multiple URLs
     for (const url of usbIdsUrls) {
       try {
         usbIdsContent = await downloadFile(url, verbose)
         const downloadTime = Date.now() - downloadStartTime
-        logger.info(`成功从 ${url} 下载数据 (耗时: ${downloadTime}ms)`, verbose)
+        logger.info(`Successfully downloaded data from ${url} (time: ${downloadTime}ms)`, verbose)
         break
       }
       catch (error) {
-        logger.warn(`从 ${url} 下载失败: ${(error as Error).message}`, verbose)
+        logger.warn(`Failed to download from ${url}: ${(error as Error).message}`, verbose)
       }
     }
 
@@ -167,22 +167,22 @@ export async function fetchUsbIdsData(
 
     if (usbIdsContent) {
       const parseStartTime = Date.now()
-      logger.info('解析USB设备数据...', verbose)
+      logger.info('Parsing USB device data...', verbose)
       data = parseUsbIds(usbIdsContent)
       const parseTime = Date.now() - parseStartTime
-      logger.info(`解析完成，共 ${Object.keys(data).length} 个供应商 (耗时: ${parseTime}ms)`, verbose)
+      logger.info(`Parsing completed, total ${Object.keys(data).length} vendors (time: ${parseTime}ms)`, verbose)
     }
     else {
-      throw new Error('未找到USB设备数据')
+      throw new Error('USB device data not found')
     }
 
     const totalTime = Date.now() - startTime
-    logger.info(`数据获取完成 (总耗时: ${totalTime}ms)`, verbose)
+    logger.info(`Data fetching completed (total time: ${totalTime}ms)`, verbose)
 
     return { data }
   }
   catch (error) {
-    logger.error(`获取USB设备数据失败: ${(error as Error).message}`)
+    logger.error(`Failed to fetch USB device data: ${(error as Error).message}`)
     throw error
   }
 }

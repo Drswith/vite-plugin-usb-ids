@@ -1,7 +1,7 @@
 export interface UsbIdsPluginOptions {
-  /** USB IDs数据源URLs */
+  /** USB IDs data source URLs */
   usbIdsUrls?: string[]
-  /** 是否启用详细日志，默认为 true */
+  /** Whether to enable verbose logging, defaults to true */
   verbose?: boolean
 }
 

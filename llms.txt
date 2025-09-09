@@ -1,0 +1,140 @@
+# vite-plugin-usb-ids
+
+## Project Overview
+
+vite-plugin-usb-ids is a Vite plugin that injects remote USB IDs data as a virtual module into Vite projects. It enables developers to access comprehensive USB device information directly in their applications without manual data management.
+
+## Key Features
+
+- **Virtual Module Injection**: Import USB device data through `virtual:usb-ids` virtual module
+- **Zero Configuration**: Works out of the box with minimal setup
+- **Multiple Data Sources**: Supports fetching from multiple URLs with automatic fallback
+- **TypeScript Support**: Automatic type definition generation
+- **Build-time Data Fetching**: Downloads and parses USB IDs data during build process
+- **Performance Optimized**: Supports both sync and async imports for better code splitting
+
+## Project Structure
+
+```
+vite-plugin-usb-ids/
+├── src/
+│   ├── index.ts          # Main entry point, exports plugin and types
+│   ├── plugin.ts         # Core plugin implementation with virtual module handling
+│   ├── typing.ts         # TypeScript interfaces and type definitions
+│   ├── config.ts         # Configuration constants and default USB IDs sources
+│   └── utils.ts          # Utility functions for data fetching and logging
+├── test/
+│   ├── exports.test.ts   # Export functionality tests
+│   └── index.test.ts     # Main plugin functionality tests
+├── client.d.ts           # Client-side type definitions for virtual modules
+├── package.json          # Package configuration and dependencies
+├── tsconfig.json         # TypeScript configuration
+├── vitest.config.ts      # Test configuration
+└── tsdown.config.ts      # Build configuration
+```
+
+## Core Components
+
+### Plugin Implementation (src/plugin.ts)
+- **Virtual Module ID**: `virtual:usb-ids` with resolved ID `\0virtual:usb-ids`
+- **Data Initialization**: Fetches USB IDs data from multiple sources during build
+- **Virtual Module Resolution**: Handles module resolution and content generation
+- **Error Handling**: Graceful fallback to empty data on fetch failures
+
+### Type Definitions (src/typing.ts)
+- **UsbIdsPluginOptions**: Plugin configuration interface
+  - `usbIdsUrls?: string[]` - Custom USB IDs data sources
+  - `verbose?: boolean` - Enable verbose logging (default: true)
+- **UsbDevice**: Individual USB device structure
+  - `devid: string` - Device ID
+  - `devname: string` - Device name
+- **UsbVendor**: USB vendor structure
+  - `vendor: string` - Vendor ID
+  - `name: string` - Vendor name
+  - `devices: Record<string, UsbDevice>` - Associated devices
+- **UsbIdsData**: Complete USB IDs data structure as vendor ID to vendor mapping
+
+## Usage Patterns
+
+### Plugin Configuration
+```typescript
+import { defineConfig } from 'vite'
+import usbIdsPlugin from 'vite-plugin-usb-ids'
+
+export default defineConfig({
+  plugins: [
+    usbIdsPlugin({
+      usbIdsUrls: ['https://custom-source.com/usb.ids'],
+      verbose: true,
+    }),
+  ],
+})
+```
+
+### Data Access Methods
+
+#### Recommended: Async Import (Dynamic)
+```typescript
+async function loadUsbData() {
+  const usbIdsData = await import('virtual:usb-ids').then(m => m.default)
+  const vendor = usbIdsData['1d6b'] // Linux Foundation
+  const device = vendor.devices['0001'] // 1.1 root hub
+}
+```
+
+#### Alternative: Sync Import (Static)
+```typescript
+import usbIdsData from 'virtual:usb-ids'
+const vendor = usbIdsData['1d6b']
+```
+
+## Technical Details
+
+### Build System
+- **Package Manager**: pnpm (v9.15.9)
+- **Build Tool**: tsdown for TypeScript compilation
+- **Testing**: Vitest for unit testing
+- **Linting**: ESLint for code quality
+- **Node Version**: >=16
+
+### Package Information
+- **Name**: vite-plugin-usb-ids
+- **Version**: 1.0.8
+- **License**: MIT
+- **Author**: Drswith
+- **Repository**: https://github.com/Drswith/vite-plugin-usb-ids
+
+### Export Structure
+- **Main Entry**: `./dist/index.js` (ESM), `./dist/index.cjs` (CommonJS)
+- **Types**: `./dist/index.d.ts`
+- **Client Types**: `./client.d.ts` for virtual module declarations
+- **Package JSON**: Accessible via `./package.json` export
+
+### Performance Considerations
+- **Code Splitting**: Dynamic imports create separate chunks
+- **Lazy Loading**: USB data loaded only when needed
+- **Bundle Optimization**: Reduces initial bundle size
+- **Build-time Processing**: Data fetching occurs during build, not runtime
+
+## Development Workflow
+
+### Available Scripts
+- `pnpm build` - Build the plugin
+- `pnpm dev` - Development mode with watch
+- `pnpm test` - Run tests
+- `pnpm lint` - Lint code
+- `pnpm lint:fix` - Fix linting issues
+- `pnpm typecheck` - TypeScript type checking
+
+### Dependencies
+The plugin is designed to be lightweight with minimal dependencies, focusing on Vite integration and USB IDs data processing.
+
+## Use Cases
+
+- **Hardware Management Applications**: Device identification and management
+- **USB Device Detection**: Real-time USB device recognition
+- **Developer Tools**: USB debugging and analysis tools
+- **IoT Applications**: Device compatibility checking
+- **System Administration**: Hardware inventory and monitoring
+
+This plugin provides a seamless way to integrate comprehensive USB device information into web applications, making it particularly valuable for hardware-related development projects.

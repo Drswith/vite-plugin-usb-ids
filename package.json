@@ -31,7 +31,8 @@
   "types": "./dist/index.d.ts",
   "files": [
     "client.d.ts",
-    "dist"
+    "dist",
+    "llms.txt"
   ],
   "engines": {
     "node": ">=16"
